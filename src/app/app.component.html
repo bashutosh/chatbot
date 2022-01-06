@@ -1,0 +1,293 @@
+<!--<button style="position: fixed;right: 10px" (click)="setFocus()">Set Custom Focus</button>-->
+<!--<br/>-->
+<div class="chatdiv" style="background:white">
+    <div class="chatbox" [formGroup]="chatForm">
+        <div class="chat-header" *ngIf="!chatMd">
+            <h4 style="color:white;
+      margin: 15px 0px;">How may I help you?</h4>
+            <!-- <img class="logo-smatest" src="https://res.cloudinary.com/psnm/image/upload/w_25/v1617080104/chatBot/shrichat_k9cak0.png"> -->
+            <i class="reload-icon" (click)="refresh()" title="Refresh Chat"></i>
+        </div>
+        <div class="chat-header-2" *ngIf="chatMd">
+            <div>
+                <h4>
+                    <img src="https://res.cloudinary.com/psnm/image/upload/w_56/v1617080104/chatBot/shrichat_k9cak0.png" class="question-icon-smatest">Greetings! Would you like to...
+                </h4>
+            </div>
+        </div>
+        <div class="chat-content" id="chat-log">
+            <span *ngFor="let log of chatLog">
+        <div class="question-div-smatest top-0" *ngIf="log.question && log.question.length != 0">
+          <div class="question-icon-div" *ngIf="!chatMd"><img
+              src="https://res.cloudinary.com/psnm/image/upload/w_25/v1617080104/chatBot/shrichat_k9cak0.png"
+              class="question-icon-smatest">
+          </div>
+          <div class="options-div-smatest">
+            <div class="quesDiv" [class.colorBlack]="log.api_response">
+              <span>
+                <app-html-content [html]="log.question"></app-html-content>
+              </span>
+<!--            <span *ngIf="!log?.display_question_as||log?.display_question_as!=='HTML'">-->
+<!--                {{log.question}}-->
+<!--              </span>-->
+        </div>
+    </div>
+</div>
+<ng-container *ngIf="log.answer">
+    <div class="answer-div top-0" *ngIf="log.answer"><label class="answer-label bot-google-font fs-14 ansDiv">
+            <span *ngIf="!log.file">{{log.answer}}</span>
+            <span *ngIf="log.file=='image'"><img class="attach-image" [src]="log.answer" ></span>
+            <span *ngIf="log.file=='pdf'"><a [href]="log.answer"><img class="doc-icons" src="./assets/pdf.png"></a></span>
+            <span *ngIf="log.file=='csv'"><a [href]="log.answer"><img class="doc-icons" src="./assets/excel.png"></a></span>
+            <span *ngIf="log.file=='doc'"><a [href]="log.answer"><img class="doc-icons" src="./assets/doc.png"></a></span>
+
+          </label>
+    </div>
+</ng-container>
+</span>
+<div *ngIf="questionLoaded===true&&errorOccurred===false" class="question-div-smatest top-0">
+    <div class="question-icon-div" *ngIf="!chatMd"><img src="https://res.cloudinary.com/psnm/image/upload/w_25/v1617080104/chatBot/shrichat_k9cak0.png" class="question-icon-smatest">
+    </div>
+    <div class="options-div-smatest">
+        <label class="bot-google-font fs-14" *ngIf="chatJson&&chatJson.questions[currentStep]&&chatJson.questions[currentStep].question">
+            <div style="text-align: left;">
+              <span *ngIf="chatJson.questions[currentStep]?.display_question_as&&chatJson.questions[currentStep]?.display_question_as==='HTML'">
+                <app-html-content [html]="chatJson.questions[this.currentStep]?.question"></app-html-content>
+              </span>
+              <span *ngIf="!chatJson.questions[currentStep]?.display_question_as||chatJson.questions[currentStep]?.display_question_as!=='HTML'">
+                {{chatJson.questions[currentStep]?.question}}
+              </span>
+              &nbsp;
+              <br>
+              <span *ngIf="chatJson.questions[this.currentStep].html_content">
+                <app-html-content [html]="chatJson.questions[this.currentStep].html_content"></app-html-content>
+              </span>
+              <video style="width: 100%;margin-top: 10px;" [class.show]="!isCaptured" [class.hide]="isCaptured||!startCamera" #video
+                autoplay></video>
+              <canvas [width]="stream_width" [height]="stream_height" style="width: 100%;" [class.show]="isCaptured" [class.hide]="!isCaptured" #canvas></canvas>
+              <div *ngIf="isCaptured" style="display: flex;justify-content: flex-end;margin-top: 10px;">
+                <button style="border: none;background: #42a7a1db;color: white;float: left;font-size: large;cursor: pointer;
+                margin-right: 10px;" class="btn btn-danger" *ngIf="isCaptured"
+                (click)="setupDevices(chatJson.questions[currentStep].id)">
+                &#10006;</button>
+                <button style="border: none;background: #42a7a1db;color: white;float: left;font-size: large;cursor: pointer;" class="btn btn-danger" *ngIf="isCaptured"
+                (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)">&#10004;</button>
+              </div>
+              <!-- <span class="raw-Html" [innerHtml]="chatJson.questions[currentStep]?.html_content"></span> -->
+            </div>
+          </label>
+        <span *ngIf="chatJson.questions[currentStep]?.type==='SCQ'">
+            <label *ngFor="let option of chatJson.questions[currentStep]?.options"
+              class="options-smatest w-auto-i m-r-5"><input  (focus)="onFocus()"
+                (change)="selectQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)" type="radio"
+                formControlName="ques{{chatJson.questions[currentStep]?.id}}" [value]="option.api_value"
+                class="radio-botest">
+              <div class="check-smatest"></div>
+              <span class="w-auto-i p-r-15">{{option?.display_value}}</span>
+        </label>
+        </span>
+        <!-- <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip this question >></button> -->
+    </div>
+</div>
+
+<div *ngIf="questionLoaded===false" class="question-div-smatest top-0">
+    <div class="question-icon-div" *ngIf="!chatMd"><img src="https://res.cloudinary.com/psnm/image/upload/w_25/v1617080104/chatBot/shrichat_k9cak0.png" class="question-icon-smatest">
+    </div>
+    <div>
+        <div class="stage">
+            <div class="dot-falling"></div>
+        </div>
+    </div>
+</div>
+
+</div>
+<div class="chat-footer" *ngIf="questionLoaded&&errorOccurred==false">
+    <button class="skip_btn mx-auto" *ngIf="chatJson.questions[currentStep]?.type==='SCQ' && chatJson.questions[currentStep]?.mandatory!=true" (click)="skipQuestion()">Skip</button>
+
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='AUTOCOMPLETE_DYNAMICOPTIONS'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <!--          ques{{chatJson.questions[currentStep]?.id}}-->
+            <div class="error2 errorAuto" *ngIf="returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <div class="d-flex selectQuestion" style="margin-top: 10px;">
+
+                <ng-select #select [items]="chatJson.questions[currentStep]?.options" bindLabel="display_value" bindValue="value" class="auto-complete" [clearable]="false" formControlName="ques{{chatJson.questions[currentStep]?.id}}" placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}"
+                    dropdownPosition="top" appAutoFocus>
+                </ng-select>
+                <div class="answer-btns">
+                    <button type="submit" (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)" class="chat-submit" style="top: 0!important;">
+                <!-- <i class="material-icons">send</i> -->
+                <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png">
+              </button>
+                    <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='TEXT'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <!--          ques{{chatJson.questions[currentStep]?.id}}-->
+            <div class="error2" *ngIf="returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <div class="d-flex" style="margin-top:10px">
+
+                <input  (focus)="onFocus()" type="text" *ngIf="chatJson.questions[currentStep]?.type==='TEXT'" id="chat-input1" formControlName="ques{{chatJson.questions[currentStep]?.id}}" placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}" appAutoFocus>
+                <div class="answer-btns">
+                    <button type="submit" (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)" class="chat-submit">
+                <!-- <i class="material-icons">send</i> -->
+                <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png">
+              </button>
+                    <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='NUMBER'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <div class="error2" *ngIf="returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <div class="d-flex" style="margin-top:10px">
+
+                <input (focus)="onFocus()" type="number" *ngIf="chatJson.questions[currentStep]?.type==='NUMBER'" id="chat-input2" formControlName="ques{{chatJson.questions[currentStep]?.id}}" placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}" appAutoFocus>
+                <div class="answer-btns">
+                    <button type="submit" (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)" class="chat-submit">
+                <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png">
+              </button>
+                    <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='FULLCAMERA'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <div class="error2" style="margin-bottom: 20px;
+          margin-top: 20px;" *ngIf="error4||returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <input (focus)="onFocus()" (change)="onFileChange($event,chatJson.questions[currentStep])" type="file" id="chat-input5" capture="environment" accept="image/*" appAutoFocus>
+            <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='CAMERA'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <!-- <input type="date" formControlName="ques{{chatJson.questions[currentStep]?.id}}" placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}" appAutoFocus> -->
+            <div style="padding: 10px;display: flex;
+          justify-content: center;">
+                <button style="border: none;background: none;float: left;padding-bottom: 8px;" *ngIf="!startCamera&&!isCaptured" (click)="setupDevices(chatJson.questions[currentStep].id)" appAutoFocus>
+              <!-- Capture Image -->
+              <img title="Capture Image" class="camera-icon" src="../assets/diaphragm.png"
+                style="display: block;pointer-events: auto;  margin-top: 0px !important;float: right;width: 30px;height: 30px;">
+            </button>
+                <button style="font-size: large;
+            background: #5db3ae;
+            color: white;
+            padding:7px" class="skip_btn" *ngIf="!isCaptured&&startCamera" (click)="capture(chatJson.questions[currentStep].id)" appAutoFocus>Capture Image</button>
+                <!-- <button type="submit" (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)"
+              class="chat-submit" style="background:white;padding-bottom: 8px;top:unset">
+              <i class="material-icons">send</i>
+              <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png"
+                style="display: block;float: right; pointer-events: auto;  margin-top: 0px !important;float: right;">
+            </button> -->
+                <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+            </div>
+            <div class="error2" style="margin-bottom: 20px;
+          margin-top: 20px;" *ngIf="returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='FILE'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <div class="error2" *ngIf="error4||(returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors)">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <div class="d-flex" style="margin-top:10px;justify-content: center;">
+                <button style="display: flex;border: none;color: white;
+              background: #42a7a1db;
+              font-size: larger;margin-right: 10px;
+              margin-bottom: 10px;padding: 8px 8px;
+    border-radius: 5px;
+    cursor: pointer;" (click)="triggerFalseClick()" appAutoFocus>
+              Upload &nbsp; <img title="Upload File" class="camera-icon" src="../assets/attach.png"
+                style="display: block;pointer-events: auto;  margin-top: 0px !important;border: none;filter: invert(1);margin-left: 5px;">
+            </button>
+
+                <button class="skip_btn" style="width: 60px;
+              margin-right: 10px;
+              margin-bottom: 10px;" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+            </div>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type==='LOGIN'">
+        <form [formGroup]="loginForm" class="form" novalidate>
+            <div class="error2" *ngIf="loginForm['controls'].username.touched==true&&loginForm['controls'].username.errors ||loginForm['controls'].password.touched==true&&loginForm['controls'].password.errors">
+                This field is required
+            </div>
+            <div class="d-flex" style="margin-top:10px">
+                <input (focus)="onFocus()" type="text" formControlName="username" *ngIf="LoginStep=='ID'" id="chat-input5" placeholder="Enter your User ID here" appAutoFocus>
+                <input (focus)="onFocus()" type="password" formControlName="password" *ngIf="LoginStep=='PASSWORD'" id="chat-input6" placeholder="Enter password here" appAutoFocus>
+                <div class="answer-btns">
+                    <button type="submit" (click)="Login()" class="chat-submit">
+                <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png">
+              </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type=='DATETIME'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <div class="error2" *ngIf="returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <div class="d-flex">
+                <input (focus)="onFocus()" style="display:none" type="text" formControlName="ques{{chatJson.questions[currentStep]?.id}}">
+                <dp-date-picker [displayDate]="datePickerConfig.displayDate" class="datePicker" [ngModelOptions]="{standalone: true}" [(ngModel)]="date" placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}" (onChange)="updateDate(chatJson.questions[currentStep]?.id,'DATETIME')" theme="dp-material" [config]="datePickerConfig"></dp-date-picker>
+                <!-- <input onkeypress="return false" id="date___ques{{chatJson.questions[currentStep]?.id}}" [min]="today"
+              type="date" (change)="updateDate(chatJson.questions[currentStep]?.id)"
+              placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}" appAutoFocus> -->
+                <select id="time___ques{{chatJson.questions[currentStep]?.id}}" (change)="updateDate(chatJson.questions[currentStep]?.id,'DATETIME')" class="date_time" placeholder="Choose Time">
+              <option *ngFor="let i of dateTimeArray" [value]="i['value']">{{i['title']}}</option>
+            </select>
+                <div class="answer-btns">
+                    <button type="submit" (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)" class="chat-submit" style="background:white;top:unset">
+                <!-- <i class="material-icons">send</i> -->
+                <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png"
+                  style="display: block; pointer-events: auto;  margin-top: 0px !important;">
+              </button>
+                    <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="chat-input" *ngIf="showInput&&chatJson.questions[currentStep]?.type=='DATE'">
+        <form [formGroup]="chatForm" class="form" novalidate>
+            <div class="error2" *ngIf="returnFormControl('ques'+chatJson.questions[currentStep]?.id).touched==true&&returnFormControl('ques'+chatJson.questions[currentStep]?.id).errors">
+                {{chatJson.questions[currentStep]?.error_text}}
+            </div>
+            <div class="d-flex" style="float: right;" >
+                <input (focus)="onFocus()"  style="display:none" type="text" formControlName="ques{{chatJson.questions[currentStep]?.id}}">
+                <dp-date-picker [displayDate]="datePickerConfig.displayDate" class="datePicker" [ngModelOptions]="{standalone: true}" [(ngModel)]="date" (onChange)="updateDate(chatJson.questions[currentStep]?.id,'DATE')" placeholder="{{chatJson.questions[currentStep]?.placeholder_text}}" theme="dp-material" [config]="datePickerConfig"></dp-date-picker>
+                <div class="answer-btns" style="margin-left: 30px;">
+                    <button  appAutoFocus type="submit" (click)="inputQuestionInputChange('ques'+chatJson.questions[currentStep]?.id)" class="chat-submit" style="background:white;padding-bottom: 8px;top:unset">
+                <!-- <i class="material-icons">send</i> -->
+                <img class="enter-icon" src="https://custpostimages.s3.ap-south-1.amazonaws.com/sb_images/enter.png"
+                  style="display: block; pointer-events: auto;  margin-top: 0px !important;">
+              </button>
+                    <button class="skip_btn" *ngIf="chatJson.questions[currentStep]?.mandatory===false" (click)="skipQuestion()">Skip</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+</div>
+</div>
+
+
+<router-outlet></router-outlet>

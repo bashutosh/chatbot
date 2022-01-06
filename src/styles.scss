@@ -1,0 +1,29 @@
+/* You can add global styles to this file, and also import other style files */
+//@import "~@ng-select/ng-select/themes/default.theme.css";
+// ... or
+@import "~@ng-select/ng-select/themes/material.theme.css";
+
+body{
+    margin:0px !important;
+    padding:0px !important;
+    width:100%;
+    max-width: 500px;
+    margin: auto;
+    // background:white;
+    border-radius:10px;
+    box-shadow:0 1pt 12pt rgb(0 0 0 / 15%);
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+.raw-Html{
+    img {
+        max-width:100% !important;
+    } 
+ }
+ dp-date-picker.dp-material .dp-picker-input {
+    width: 95% !important;
+}
+
+.selectQuestion .ng-select .ng-select-container .ng-value-container .ng-input>input{
+    width:unset !important
+}
